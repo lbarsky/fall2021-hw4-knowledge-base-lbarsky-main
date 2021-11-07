@@ -116,6 +116,27 @@ class KnowledgeBase(object):
             print("Invalid ask:", fact.statement)
             return []
 
+    def fact_rule_retract(self, fact_rule):
+        if fact_rule in self.facts:
+            #print("Index of fact in the list is ", self.facts.index(fact))
+            #fact_from_list = self.facts[self.facts.index(fact_rule)]
+            if len(fact_rule.supported_by) != 0:
+                return
+            else:
+                self.facts.remove(fact_rule)
+                for fr in fact_rule.supports_facts: #1 remove this fact from fr.supported_by and 2 call retract on fr
+                    fr.supported_by.remove(fact_rule)
+                    fact_rule_retract(self, fr)
+                for fr in fact_rule.supports_rules:
+                    fr.supported_by.remove(fact_rule)
+                    fact_rule_retract(self, fr)
+        if isinstance(fact_rule, Rule) and not fact_rule.asserted:
+            if len(fact_rule.supported_by) == 0:
+                self.rules.remove(fact_rule)
+            else:
+                return
+                #only do something if rule is unasserted and unsupported?
+
     def kb_retract(self, fact):
         """Retract a fact from the KB
 
@@ -125,17 +146,16 @@ class KnowledgeBase(object):
         Returns:
             None
         """
+        fact_rule_retract(self, fact)
         printv("Retracting {!r}", 0, verbose, [fact])
         ####################################################
         # Student code goes here
-        if fact in self.facts:
-            #print("Index of fact in the list is ", self.facts.index(fact))
-            fact_from_list = self.facts[self.facts.index(fact)]
-            # See if the fact is supported; don't retract if it is
+
+
+            #See if the fact is supported; don't retract if it is
             #print("The fact is supported by ", fact_from_list.supported_by)
-            # If the fact is supported, just return
-            # If the fact is unsupported, go through other rules & facts that are supported by this one
-            # self.facts.remove(fact)
+            #If the fact is supported, just return
+            #If the fact is unsupported, go through other rules & facts that are supported by this one
             # If those facts/rules become unsupported, and are *not* asserted (asserted=False), then remove them
 
 class InferenceEngine(object):
